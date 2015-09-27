@@ -11,23 +11,31 @@ var defaults = {
 	apiLimitInterval: 1000
 };
 
-function eztvapi (options) {
+function eztvapi(options) {
 
 	options = extend({}, defaults, options);
 
 	var limit = trickle(options.apiLimitRequests, options.apiLimitInterval);
 
-	function limitedRequest (uri, callback) {
-		limit(function makeRequest () {
+	function limitedRequest(uri, callback) {
+		limit(function makeRequest() {
 			request({
 				uri: uri,
 				json: true
 
 			}, function (err, response, body) {
-				if (err) { return callback(err); }
-				if (response.statusCode !== 200) { return callback(new Error('Request failed')); }
-				if (!body) { return callback(new Error('No content')); }
-				if (Array.isArray(body) && !body.length) { return callback(new Error('Empty')); }
+				if (err) {
+					return callback(err);
+				}
+				if (response.statusCode !== 200) {
+					return callback(new Error('Request failed'));
+				}
+				if (!body) {
+					return callback(new Error('No content'));
+				}
+				if (Array.isArray(body) && !body.length) {
+					return callback(new Error('Empty'));
+				}
 
 				callback(null, body);
 			});
@@ -36,9 +44,19 @@ function eztvapi (options) {
 
 	return {
 
-		getShows: function (page, callback) {
+		getShows: function (page, query, callback) {
+
+			if (typeof query === 'function') {
+				callback = query;
+			}
+
 			page = page || 1;
 			var uri = options.apiUrl + '/shows/' + page;
+
+			if (query) {
+				uri += '?keywords=' + query;
+			}
+
 			limitedRequest(uri, callback);
 		},
 
@@ -57,7 +75,7 @@ function eztvapi (options) {
 
 			var currentPage = 1;
 
-			function fetchShows () {
+			function fetchShows() {
 				self.getShows(currentPage, function (err, shows) {
 					currentPage += 1;
 
