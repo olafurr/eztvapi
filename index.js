@@ -33,9 +33,6 @@ function eztvapi(options) {
 				if (!body) {
 					return callback(new Error('No content'));
 				}
-				if (Array.isArray(body) && !body.length) {
-					return callback(new Error('Empty'));
-				}
 
 				callback(null, body);
 			});
